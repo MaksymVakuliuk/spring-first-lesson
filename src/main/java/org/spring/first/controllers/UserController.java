@@ -47,13 +47,20 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public UserResponseDto get(@PathVariable Long userId) {
-        return new UserResponseDto(userService.getUserById(userId));
+        return getUserResponseDto(userService.getUserById(userId));
     }
 
-    @GetMapping("/")
+    @GetMapping
     public List<UserResponseDto> getAll() {
         return userService.listUsers().stream()
-                .map(UserResponseDto::new)
+                .map(this::getUserResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    private UserResponseDto getUserResponseDto(User user) {
+        var userResponseDto = new UserResponseDto();
+        userResponseDto.setId(user.getId());
+        userResponseDto.setLogin(user.getLogin());
+        return userResponseDto;
     }
 }
