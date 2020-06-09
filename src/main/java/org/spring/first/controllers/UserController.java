@@ -1,7 +1,7 @@
 package org.spring.first.controllers;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.spring.first.dto.UserResponseDto;
 import org.spring.first.model.User;
 import org.spring.first.service.UserService;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
 
     private UserService userService;
@@ -21,7 +21,7 @@ public class UserController {
     }
 
     @GetMapping("/inject")
-    public void inject() {
+    public String inject() {
         var user1 = new User();
         user1.setLogin("login1");
         user1.setPassword("pass1");
@@ -41,29 +41,19 @@ public class UserController {
         user4.setLogin("login4");
         user4.setPassword("pass4");
         userService.add(user4);
+
+        return "Users was created.";
     }
 
-    @GetMapping("/get/{userId}")
+    @GetMapping("/{userId}")
     public UserResponseDto get(@PathVariable Long userId) {
-        var user = userService.getUserById(userId);
-        var userDto = new UserResponseDto();
-        userDto.setId(user.getId());
-        userDto.setLogin(user.getLogin());
-        userDto.setPassword(user.getPassword());
-        return userDto;
+        return new UserResponseDto(userService.getUserById(userId));
     }
 
     @GetMapping("/")
     public List<UserResponseDto> getAll() {
-        var users = userService.listUsers();
-        List<UserResponseDto> userResponseDtoList = new ArrayList<>();
-        for (User user : users) {
-            var userResponseDto = new UserResponseDto();
-            userResponseDto.setId(user.getId());
-            userResponseDto.setLogin(user.getLogin());
-            userResponseDto.setPassword(user.getPassword());
-            userResponseDtoList.add(userResponseDto);
-        }
-        return userResponseDtoList;
+        return userService.listUsers().stream()
+                .map(UserResponseDto::new)
+                .collect(Collectors.toList());
     }
 }
